@@ -18,7 +18,11 @@ describe('InvoiceCalculatorService', () => {
 
     const result = service.CalculateInvoice([
       { product: 'Pizza', priceInclusiveVat: 6, vatCategory: VatCategory.Food },
-      { product: 'Drink', priceInclusiveVat: 3, vatCategory: VatCategory.Drinks },
+      {
+        product: 'Drink',
+        priceInclusiveVat: 3,
+        vatCategory: VatCategory.Drinks
+      }
     ]);
 
     expect(vatCategoriesServiceMock.getVat).toHaveBeenCalledTimes(2);
@@ -31,5 +35,22 @@ describe('InvoiceCalculatorService', () => {
     expect(result.invoiceLines.length).toBe(2);
     expect(result.invoiceLines[0].priceExclusiveVat).toBe(6 / dummyVatFactor);
     expect(result.invoiceLines[1].priceExclusiveVat).toBe(3 / dummyVatFactor);
+  });
+
+  it('should handle empty input correctly', () => {
+    const vatCategoriesServiceMock = {
+      getVat: jasmine.createSpy('getVat').and.returnValue(10)
+    };
+
+    const service = new InvoiceCalculatorService(vatCategoriesServiceMock);
+
+    const result = service.CalculateInvoice([]);
+
+    expect(result).not.toBeFalsy();
+
+    expect(result.totalPriceInclusiveVat).toBe(0);
+    expect(result.totalPriceExclusiveVat).toBe(0);
+
+    expect(result.invoiceLines.length).toBe(0);
   });
 });
